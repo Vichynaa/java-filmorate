@@ -17,7 +17,6 @@ public class FilmController {
     private final Map<Long, Film> films = new HashMap<>();
     private static final Logger log = LoggerFactory.getLogger(FilmController.class);
 
-
     @GetMapping
     public Collection<Film> findAll() {
         log.info("GET request /films");
