@@ -15,19 +15,19 @@ import java.util.Map;
 @RequestMapping("/films")
 public class FilmController {
     private final Map<Long, Film> films = new HashMap<>();
-    private static final Logger log = LoggerFactory.getLogger(FilmController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FilmController.class);
 
     @GetMapping
     public Collection<Film> findAll() {
-        log.info("GET request /films");
+        LOGGER.info("GET request /films");
         return films.values();
     }
 
     @PostMapping
     public Film create(@RequestBody Film film) {
-        log.info("POST request /films");
+        LOGGER.info("POST request /films");
         if (film.getName().isBlank()) {
-            log.error("Error при валидации, название не может быть пустым");
+            LOGGER.error("Error при валидации, название не может быть пустым");
             throw new ValidationException("Название не может быть пустым");
         }
         validation(film);
@@ -38,9 +38,9 @@ public class FilmController {
 
     @PutMapping
     public Film update(@RequestBody Film newFilm) {
-        log.info("PUT request /films");
+        LOGGER.info("PUT request /films");
         if (newFilm.getId() == null) {
-            log.error("Error при валидации, id должен быть указан");
+            LOGGER.error("Error при валидации, id должен быть указан");
             throw new ValidationException("id должен быть указан");
         }
         if (films.containsKey(newFilm.getId())) {
@@ -48,7 +48,7 @@ public class FilmController {
             setFields(newFilm);
             return films.get(newFilm.getId());
         }
-        log.error("Error при валидации, Пост с id = " + newFilm.getId() + " не найден");
+        LOGGER.error("Error при валидации, Пост с id = " + newFilm.getId() + " не найден");
         throw new ValidationException("Пост с id = " + newFilm.getId() + " не найден");
     }
 
@@ -79,15 +79,15 @@ public class FilmController {
 
     private void validation(Film film) {
         if (film.getDescription().length() > 200) {
-            log.error("Error при валидации, Максимальная длина описания — 200 символов");
+            LOGGER.error("Error при валидации, Максимальная длина описания — 200 символов");
             throw new ValidationException("Максимальная длина описания — 200 символов");
         }
         if (film.getReleaseDate().isBefore(LocalDate.parse("1895-12-28"))) {
-            log.error("Error при валидации, Дата релиза — не раньше 28 декабря 1895 года");
+            LOGGER.error("Error при валидации, Дата релиза — не раньше 28 декабря 1895 года");
             throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
         }
         if (film.getDuration() < 0) {
-            log.error("Error при валидации, Продолжительность фильма должна быть положительным числом");
+            LOGGER.error("Error при валидации, Продолжительность фильма должна быть положительным числом");
             throw new ValidationException("Продолжительность фильма должна быть положительным числом");
         }
     }

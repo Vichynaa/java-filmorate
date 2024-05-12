@@ -16,30 +16,30 @@ import java.util.Map;
 @RequestMapping("/users")
 public class UserController {
     private final Map<Long, User> users = new HashMap<>();
-    private static final Logger log = LoggerFactory.getLogger(UserController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
     @GetMapping
     public Collection<User> findAll() {
-        log.info("GET request /users");
+        LOGGER.info("GET request /users");
         return users.values();
     }
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
-        log.info("POST request /users");
+        LOGGER.info("POST request /users");
         if (user.getEmail() == null || !(user.getEmail().contains("@"))) {
-            log.error("Error при валидации, электронная почта не может быть пустой и должна содержать символ @");
+            LOGGER.error("Error при валидации, электронная почта не может быть пустой и должна содержать символ @");
             throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
         }
         if (user.getLogin() == null || user.getLogin().contains(" ")) {
-            log.error("Error при валидации, логин не может быть пустым и содержать пробелы");
+            LOGGER.error("Error при валидации, логин не может быть пустым и содержать пробелы");
             throw new ValidationException("Логин не может быть пустым и содержать пробелы");
         }
         if (user.getName() == null) {
             user.setName(user.getLogin());
         }
         if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.error("Error при валидации, дата рождения не может быть в будущем");
+            LOGGER.error("Error при валидации, дата рождения не может быть в будущем");
             throw new ValidationException("Дата рождения не может быть в будущем");
         }
         user.setId(getNextId());
@@ -49,26 +49,26 @@ public class UserController {
 
     @PutMapping
     public User update(@Valid @RequestBody User newUser) {
-        log.info("PUT request /users");
+        LOGGER.info("PUT request /users");
         if (newUser.getId() == null) {
-            log.error("Error при валидации, id должен быть указан");
+            LOGGER.error("Error при валидации, id должен быть указан");
             throw new ValidationException("id должен быть указан");
         }
         if (!(users.containsKey(newUser.getId()))) {
-            log.error("Error при валидации, такого id не существует");
+            LOGGER.error("Error при валидации, такого id не существует");
             throw new ValidationException("Такого id не существует");
         }
         User oldUser = users.get(newUser.getId());
         if (newUser.getEmail() != null && !(newUser.getEmail().contains("@"))) {
-            log.error("Error при валидации, электронная почта должна содержать символ @");
+            LOGGER.error("Error при валидации, электронная почта должна содержать символ @");
             throw new ValidationException("Электронная почта должна содержать символ @");
         }
         if (newUser.getLogin() != null && newUser.getLogin().contains(" ")) {
-            log.error("Error при валидации, логин не может содержать пробелы");
+            LOGGER.error("Error при валидации, логин не может содержать пробелы");
             throw new ValidationException("Логин не может содержать пробелы");
         }
         if (newUser.getBirthday() != null && newUser.getBirthday().isAfter(LocalDate.now())) {
-            log.error("Error при валидации, дата рождения не может быть в будущем");
+            LOGGER.error("Error при валидации, дата рождения не может быть в будущем");
             throw new ValidationException("Дата рождения не может быть в будущем");
         }
         if (newUser.getBirthday() != null) {
