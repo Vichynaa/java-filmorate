@@ -48,6 +48,7 @@ public class FilmController {
         LOGGER.info(String.format("Put /films/{%d}/like/{%d}", id, userId));
         return filmService.like(id, userId);
     }
+
     @DeleteMapping("/{id}/like/{userId}")
     public String removeLike(@PathVariable Long id, @PathVariable Long userId) {
         LOGGER.info(String.format("Delete /films/{%d}/like/{%d}", id, userId));
