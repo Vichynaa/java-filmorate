@@ -8,18 +8,20 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 @Service
-public class UserService {
+public class UserService implements UserInterface {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
-    InMemoryUserStorage inMemoryUserStorage;
+    private final InMemoryUserStorage inMemoryUserStorage;
 
     public UserService(InMemoryUserStorage inMemoryUserStorage) {
         this.inMemoryUserStorage = inMemoryUserStorage;
     }
 
+    @Override
     public void addFriend(Long firstId, Long secondId) {
         if (!inMemoryUserStorage.getUsers().containsKey(firstId)) {
             LOGGER.error(String.format("Error пользватель с id - %d, не найден", firstId));
@@ -44,6 +46,7 @@ public class UserService {
         LOGGER.info(String.format("Info пользователи с id - %d и %d, стали друзьями", firstId, secondId));
     }
 
+    @Override
     public void deleteFriend(Long firstId, Long secondId) {
         if (!inMemoryUserStorage.getUsers().containsKey(firstId)) {
             LOGGER.error(String.format("Error пользватель с id - %d, не найден", firstId));
@@ -64,6 +67,7 @@ public class UserService {
         LOGGER.info(String.format("Info пользователи с id - %d и %d, перестали быть друзьями", firstId, secondId));
     }
 
+    @Override
     public List<User> getFriends(Long id) {
         if (!inMemoryUserStorage.getUsers().containsKey(id)) {
             LOGGER.error(String.format("Error пользватель с id - %d, не найден", id));
@@ -74,6 +78,7 @@ public class UserService {
                 .toList();
     }
 
+    @Override
     public List<User> getSameFriends(Long firstId, Long secondId) {
         if (!inMemoryUserStorage.getUsers().containsKey(firstId)) {
             LOGGER.error(String.format("Error пользватель с id - %d, не найден", firstId));
@@ -91,6 +96,21 @@ public class UserService {
         return sameFriends.stream()
                 .map(inMemoryUserStorage.getUsers()::get)
                 .toList();
+    }
+
+    @Override
+    public User create(User user) {
+        return inMemoryUserStorage.create(user);
+    }
+
+    @Override
+    public User update(User newUser) {
+        return inMemoryUserStorage.update(newUser);
+    }
+
+    @Override
+    public Collection<User> findAll() {
+        return inMemoryUserStorage.findAll();
     }
 
 }

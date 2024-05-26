@@ -14,13 +14,9 @@ import java.util.*;
 @RequestMapping("/films")
 public class FilmController {
     private static final Logger LOGGER = LoggerFactory.getLogger(FilmController.class);
-    InMemoryUserStorage inMemoryUserStorage;
-    InMemoryFilmStorage inMemoryFilmStorage;
-    FilmService filmService;
+    private final FilmService filmService;
 
-    public FilmController(InMemoryUserStorage inMemoryUserStorage, InMemoryFilmStorage inMemoryFilmStorage, FilmService filmService) {
-        this.inMemoryUserStorage = inMemoryUserStorage;
-        this.inMemoryFilmStorage = inMemoryFilmStorage;
+    public FilmController(FilmService filmService) {
         this.filmService = filmService;
     }
 
@@ -28,19 +24,19 @@ public class FilmController {
     @GetMapping
     public Collection<Film> findAll() {
         LOGGER.info("Get /films");
-        return inMemoryFilmStorage.findAll();
+        return filmService.findAll();
     }
 
     @PostMapping
     public Film create(@RequestBody Film film) {
         LOGGER.info("Post /films");
-        return inMemoryFilmStorage.create(film);
+        return filmService.create(film);
     }
 
     @PutMapping
     public Film update(@RequestBody Film newFilm) {
         LOGGER.info("Put /films");
-        return inMemoryFilmStorage.update(newFilm);
+        return filmService.update(newFilm);
     }
 
     @PutMapping("/{id}/like/{userId}")

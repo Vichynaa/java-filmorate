@@ -12,16 +12,17 @@ import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 import java.util.*;
 
 @Service
-public class FilmService {
+public class FilmService implements FilmInterface {
     private static final Logger LOGGER = LoggerFactory.getLogger(FilmService.class);
-    InMemoryFilmStorage inMemoryFilmStorage;
-    InMemoryUserStorage inMemoryUserStorage;
+    private final InMemoryFilmStorage inMemoryFilmStorage;
+    private final InMemoryUserStorage inMemoryUserStorage;
 
     public FilmService(InMemoryFilmStorage inMemoryFilmStorage, InMemoryUserStorage inMemoryUserStorage) {
         this.inMemoryFilmStorage = inMemoryFilmStorage;
         this.inMemoryUserStorage = inMemoryUserStorage;
     }
 
+    @Override
     public void like(Long filmId, Long userId) {
         if (!inMemoryFilmStorage.getFilms().containsKey(filmId)) {
             LOGGER.error(String.format("Error не найден фильм с id - %d", filmId));
@@ -39,6 +40,7 @@ public class FilmService {
                 film.getId(), userId));
     }
 
+    @Override
     public void removeLike(Long filmId, Long userId) {
         if (!inMemoryFilmStorage.getFilms().containsKey(filmId)) {
             LOGGER.error(String.format("Error не найден фильм с id - %d", filmId));
@@ -61,11 +63,27 @@ public class FilmService {
                 film.getId(), userId));
     }
 
+    @Override
     public List<Film> findList(Optional<Integer> count) {
         int countToPrint = count.map(integer -> Math.min(inMemoryFilmStorage.getFilms().size(), integer)).orElse(10);
         return inMemoryFilmStorage.getFilms().values().stream()
                 .sorted(Comparator.comparingInt((Film film) -> film.getLikes().size()).reversed())
                 .limit(countToPrint)
                 .toList();
+    }
+
+    @Override
+    public Film create(Film film) {
+        return inMemoryFilmStorage.create(film);
+    }
+
+    @Override
+    public Film update(Film newFilm) {
+        return inMemoryFilmStorage.update(newFilm);
+    }
+
+    @Override
+    public Collection<Film> findAll() {
+        return inMemoryFilmStorage.findAll();
     }
 }

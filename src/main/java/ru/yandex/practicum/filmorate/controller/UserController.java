@@ -15,30 +15,28 @@ import java.util.List;
 @RequestMapping("/users")
 public class UserController {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
-    InMemoryUserStorage inMemoryUserStorage;
-    UserService userService;
+    private final UserService userService;
 
-    public UserController(InMemoryUserStorage inMemoryUserStorage, UserService userService) {
-        this.inMemoryUserStorage = inMemoryUserStorage;
+    public UserController(UserService userService) {
         this.userService = userService;
     }
 
     @GetMapping
     public Collection<User> findAll() {
         LOGGER.info("Get /users");
-        return inMemoryUserStorage.findAll();
+        return userService.findAll();
     }
 
     @PostMapping
     public User create(@RequestBody User user) {
         LOGGER.info("Post /users");
-        return inMemoryUserStorage.create(user);
+        return userService.create(user);
     }
 
     @PutMapping
     public User update(@RequestBody User newUser) {
         LOGGER.info("Put /users");
-        return inMemoryUserStorage.update(newUser);
+        return userService.update(newUser);
     }
 
     @PutMapping("/{id}/friends/{friendId}")

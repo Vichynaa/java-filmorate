@@ -46,6 +46,10 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User update(User newUser) {
+        if (newUser == null) {
+            LOGGER.error("Error не передан пользователь");
+            throw new ValidationException("Не передан пользователь");
+        }
         if (newUser.getId() == null) {
             LOGGER.error("Error при валидации, id должен быть указан");
             throw new ValidationException("id должен быть указан");
