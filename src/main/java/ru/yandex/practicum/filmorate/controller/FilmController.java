@@ -5,90 +5,60 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    private final Map<Long, Film> films = new HashMap<>();
     private static final Logger LOGGER = LoggerFactory.getLogger(FilmController.class);
+    InMemoryUserStorage inMemoryUserStorage;
+    InMemoryFilmStorage inMemoryFilmStorage;
+    FilmService filmService;
+
+    public FilmController(InMemoryUserStorage inMemoryUserStorage, InMemoryFilmStorage inMemoryFilmStorage, FilmService filmService) {
+        this.inMemoryUserStorage = inMemoryUserStorage;
+        this.inMemoryFilmStorage = inMemoryFilmStorage;
+        this.filmService = filmService;
+    }
+
 
     @GetMapping
     public Collection<Film> findAll() {
-        LOGGER.info("GET request /films");
-        return films.values();
+        LOGGER.info("Get /films");
+        return inMemoryFilmStorage.findAll();
     }
 
     @PostMapping
     public Film create(@RequestBody Film film) {
-        LOGGER.info("POST request /films");
-        if (film.getName().isBlank()) {
-            LOGGER.error("Error при валидации, название не может быть пустым");
-            throw new ValidationException("Название не может быть пустым");
-        }
-        validation(film);
-        film.setId(getNextId());
-        films.put(film.getId(), film);
-        return film;
+        LOGGER.info("Post /films");
+        return inMemoryFilmStorage.create(film);
     }
 
     @PutMapping
     public Film update(@RequestBody Film newFilm) {
-        LOGGER.info("PUT request /films");
-        if (newFilm.getId() == null) {
-            LOGGER.error("Error при валидации, id должен быть указан");
-            throw new ValidationException("id должен быть указан");
-        }
-        if (films.containsKey(newFilm.getId())) {
-            validation(newFilm);
-            setFields(newFilm);
-            return films.get(newFilm.getId());
-        }
-        LOGGER.error("Error при валидации, Пост с id = " + newFilm.getId() + " не найден");
-        throw new ValidationException("Пост с id = " + newFilm.getId() + " не найден");
+        LOGGER.info("Put /films");
+        return inMemoryFilmStorage.update(newFilm);
     }
 
-    private long getNextId() {
-        long currentMaxId = films.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+    @PutMapping("/{id}/like/{userId}")
+    public String like(@PathVariable Long id, @PathVariable Long userId) {
+        LOGGER.info(String.format("Put /films/{%d}/like/{%d}", id, userId));
+        return filmService.like(id, userId);
+    }
+    @DeleteMapping("/{id}/like/{userId}")
+    public String removeLike(@PathVariable Long id, @PathVariable Long userId) {
+        LOGGER.info(String.format("Delete /films/{%d}/like/{%d}", id, userId));
+        return filmService.removeLike(id, userId);
     }
 
-    private void setFields(Film newFilm) {
-        Film oldFilm = films.get(newFilm.getId());
-        if (newFilm.getDescription() != null) {
-            oldFilm.setDescription(newFilm.getDescription());
-        }
-        if (newFilm.getDuration() != null) {
-            oldFilm.setDuration(newFilm.getDuration());
-        }
-        if (newFilm.getReleaseDate() != null) {
-            oldFilm.setReleaseDate(newFilm.getReleaseDate());
-        }
-        if (newFilm.getName() != null) {
-            oldFilm.setName(newFilm.getName());
-        }
-    }
-
-    private void validation(Film film) {
-        if (film.getDescription().length() > 200) {
-            LOGGER.error("Error при валидации, Максимальная длина описания — 200 символов");
-            throw new ValidationException("Максимальная длина описания — 200 символов");
-        }
-        if (film.getReleaseDate().isBefore(LocalDate.parse("1895-12-28"))) {
-            LOGGER.error("Error при валидации, Дата релиза — не раньше 28 декабря 1895 года");
-            throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
-        }
-        if (film.getDuration() < 0) {
-            LOGGER.error("Error при валидации, Продолжительность фильма должна быть положительным числом");
-            throw new ValidationException("Продолжительность фильма должна быть положительным числом");
-        }
+    @GetMapping("/popular")
+    public List<Film> findList(@RequestParam Optional<Integer> count) {
+        LOGGER.info("Get /films/popular");
+        return filmService.findList(count);
     }
 }
