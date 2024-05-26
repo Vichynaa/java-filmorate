@@ -22,7 +22,7 @@ public class FilmService {
         this.inMemoryUserStorage = inMemoryUserStorage;
     }
 
-    public String like(Long filmId, Long userId) {
+    public void like(Long filmId, Long userId) {
         if (!inMemoryFilmStorage.getFilms().containsKey(filmId)) {
             LOGGER.error(String.format("Error не найден фильм с id - %d", filmId));
             throw new NotFoundException(String.format("Не найден фильм с id - %d", filmId));
@@ -33,20 +33,13 @@ public class FilmService {
         }
         Film film = inMemoryFilmStorage.getFilms().get(filmId);
         Set<Long> newLikes = film.getLikes();
-        boolean checkLike = newLikes.add(userId);
-        if (!checkLike) {
-            LOGGER.debug(String.format("Debug пользватель с id - %d, уже поставил лайк посту с id - %d",
-                    userId, filmId));
-            throw new ValidationException(String.format("Пользватель с id - %d, уже поставил лайк посту с id - %d",
-                    userId, filmId));
-        }
+        newLikes.add(userId);
         film.setLikes(newLikes);
         LOGGER.info(String.format("Info к фильму с id - %d, поставлен лайк пользователем с id - %d",
                 film.getId(), userId));
-        return String.format("К фильму с id - %d, поставлен лайк пользователем с id - %d", film.getId(), userId);
     }
 
-    public String removeLike(Long filmId, Long userId) {
+    public void removeLike(Long filmId, Long userId) {
         if (!inMemoryFilmStorage.getFilms().containsKey(filmId)) {
             LOGGER.error(String.format("Error не найден фильм с id - %d", filmId));
             throw new NotFoundException(String.format("Не найден фильм с id - %d", filmId));
@@ -66,7 +59,6 @@ public class FilmService {
         film.setLikes(newLikes);
         LOGGER.info(String.format("Info у фильма с id - %d, удалён лайк пользователем с id - %d",
                 film.getId(), userId));
-        return String.format("У фильма с id - %d, удалён лайк пользователем с id - %d", film.getId(), userId);
     }
 
     public List<Film> findList(Optional<Integer> count) {

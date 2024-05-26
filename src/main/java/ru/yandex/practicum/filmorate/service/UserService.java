@@ -20,7 +20,7 @@ public class UserService {
         this.inMemoryUserStorage = inMemoryUserStorage;
     }
 
-    public String addFriend(Long firstId, Long secondId) {
+    public void addFriend(Long firstId, Long secondId) {
         if (!inMemoryUserStorage.getUsers().containsKey(firstId)) {
             LOGGER.error(String.format("Error пользватель с id - %d, не найден", firstId));
             throw new NotFoundException(String.format("Пользватель с id - %d, не найден", firstId));
@@ -42,10 +42,9 @@ public class UserService {
         firstFriend.setFriends(newFirstFriends);
         secondFriend.setFriends(newSecondFriends);
         LOGGER.info(String.format("Info пользователи с id - %d и %d, стали друзьями", firstId, secondId));
-        return String.format("Пользователи с id - %d и %d, стали друзьями", firstId, secondId);
     }
 
-    public String deleteFriend(Long firstId, Long secondId) {
+    public void deleteFriend(Long firstId, Long secondId) {
         if (!inMemoryUserStorage.getUsers().containsKey(firstId)) {
             LOGGER.error(String.format("Error пользватель с id - %d, не найден", firstId));
             throw new NotFoundException(String.format("Пользватель с id - %d, не найден", firstId));
@@ -58,17 +57,11 @@ public class UserService {
         User secondFriend = inMemoryUserStorage.getUsers().get(secondId);
         Set<Long> newFirstFriends = firstFriend.getFriends();
         Set<Long> newSecondFriends = secondFriend.getFriends();
-        boolean checkFriend = newFirstFriends.remove(secondFriend.getId());
+        newFirstFriends.remove(secondFriend.getId());
         newSecondFriends.remove(firstFriend.getId());
-        if (!checkFriend) {
-            LOGGER.debug(String.format("Debug пользователи с id - %d и %d, не являются друзьями", firstId, secondId));
-            throw new ValidationException(String.format(
-                    "Пользователи с id - %d и %d, не являются друзьями", firstId, secondId));
-        }
         firstFriend.setFriends(newFirstFriends);
         secondFriend.setFriends(newSecondFriends);
         LOGGER.info(String.format("Info пользователи с id - %d и %d, перестали быть друзьями", firstId, secondId));
-        return String.format("Пользователи с id - %d и %d, перестали быть друзьями", firstId, secondId);
     }
 
     public List<User> getFriends(Long id) {
