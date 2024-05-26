@@ -4,96 +4,70 @@ import exception.ValidationException;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+
+import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private final Map<Long, User> users = new HashMap<>();
     private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
+    InMemoryUserStorage inMemoryUserStorage;
+    UserService userService;
+
+    public UserController(InMemoryUserStorage inMemoryUserStorage, UserService userService) {
+        this.inMemoryUserStorage = inMemoryUserStorage;
+        this.userService = userService;
+    }
 
     @GetMapping
     public Collection<User> findAll() {
-        LOGGER.info("GET request /users");
-        return users.values();
+        LOGGER.info("Get /users");
+        return inMemoryUserStorage.findAll();
     }
 
     @PostMapping
-    public User create(@Valid @RequestBody User user) {
-        LOGGER.info("POST request /users");
-        if (user.getEmail() == null || !(user.getEmail().contains("@"))) {
-            LOGGER.error("Error при валидации, электронная почта не может быть пустой и должна содержать символ @");
-            throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
-        }
-        if (user.getLogin() == null || user.getLogin().contains(" ")) {
-            LOGGER.error("Error при валидации, логин не может быть пустым и содержать пробелы");
-            throw new ValidationException("Логин не может быть пустым и содержать пробелы");
-        }
-        if (user.getName() == null) {
-            user.setName(user.getLogin());
-        }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            LOGGER.error("Error при валидации, дата рождения не может быть в будущем");
-            throw new ValidationException("Дата рождения не может быть в будущем");
-        }
-        user.setId(getNextId());
-        users.put(user.getId(), user);
-        return user;
+    public User create(@RequestBody User user) {
+        LOGGER.info("Post /users");
+        return inMemoryUserStorage.create(user);
     }
 
     @PutMapping
-    public User update(@Valid @RequestBody User newUser) {
-        LOGGER.info("PUT request /users");
-        if (newUser.getId() == null) {
-            LOGGER.error("Error при валидации, id должен быть указан");
-            throw new ValidationException("id должен быть указан");
-        }
-        if (!(users.containsKey(newUser.getId()))) {
-            LOGGER.error("Error при валидации, такого id не существует");
-            throw new ValidationException("Такого id не существует");
-        }
-        User oldUser = users.get(newUser.getId());
-        if (newUser.getEmail() != null && !(newUser.getEmail().contains("@"))) {
-            LOGGER.error("Error при валидации, электронная почта должна содержать символ @");
-            throw new ValidationException("Электронная почта должна содержать символ @");
-        }
-        if (newUser.getLogin() != null && newUser.getLogin().contains(" ")) {
-            LOGGER.error("Error при валидации, логин не может содержать пробелы");
-            throw new ValidationException("Логин не может содержать пробелы");
-        }
-        if (newUser.getBirthday() != null && newUser.getBirthday().isAfter(LocalDate.now())) {
-            LOGGER.error("Error при валидации, дата рождения не может быть в будущем");
-            throw new ValidationException("Дата рождения не может быть в будущем");
-        }
-        if (newUser.getBirthday() != null) {
-            oldUser.setBirthday(newUser.getBirthday());
-        }
-        if (newUser.getEmail() != null) {
-            oldUser.setEmail(newUser.getEmail());
-        }
-        if (newUser.getLogin() != null) {
-            oldUser.setLogin(newUser.getLogin());
-        }
-        if (newUser.getName() != null) {
-            oldUser.setName(newUser.getName());
-        } else {
-            oldUser.setName(oldUser.getLogin());
-        }
-        return oldUser;
+    public User update(@RequestBody User newUser) {
+        LOGGER.info("Put /users");
+        return inMemoryUserStorage.update(newUser);
     }
 
-    private long getNextId() {
-        long currentMaxId = users.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+    @PutMapping("/{id}/friends/{friendId}")
+    public String addFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        LOGGER.info(String.format("Put /users/{%d}/friends/{%d}", id, friendId));
+        return userService.addFriend(id, friendId);
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public String deleteFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        LOGGER.info(String.format("Delete /users/{%d}/friends/{%d}", id, friendId));
+        return userService.deleteFriend(id, friendId);
+    }
+
+    @GetMapping("/{id}/friends")
+    public List<User> getFriends(@PathVariable Long id) {
+        LOGGER.info(String.format("Get /users/{%d}/friends", id));
+        return userService.getFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getSameFriends(@PathVariable Long id, @PathVariable Long otherId) {
+        LOGGER.info(String.format("Get /users/{%d}/friends/common/{%d}", id, otherId));
+        return userService.getSameFriends(id, otherId);
     }
 }
