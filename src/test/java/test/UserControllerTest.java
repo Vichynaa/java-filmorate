@@ -76,13 +76,13 @@ public class UserControllerTest {
         HttpResponse<String> responseLogin = client.send(requestLogin, HttpResponse.BodyHandlers.ofString());
         HttpResponse<String> responseBirthday = client.send(requestBirthday, HttpResponse.BodyHandlers.ofString());
 
-        assertTrue(responseEmpty.statusCode() == 500,
+        assertTrue(responseEmpty.statusCode() == 400,
                 "Ошибка валидации при отправлении пустого запроса");
         assertTrue(responseEmail.statusCode() == 400,
                 "Ошибка валидации email");
-        assertTrue(responseLogin.statusCode() == 500,
+        assertTrue(responseLogin.statusCode() == 400,
                 "Ошибка валидации login");
-        assertTrue(responseBirthday.statusCode() == 500,
+        assertTrue(responseBirthday.statusCode() == 400,
                 "Ошибка валидации birthday");
     }
 

@@ -92,13 +92,13 @@ public class FilmControllerTest {
 
         assertTrue(responseEmpty.statusCode() == 500,
                 "Ошибка валидации при отправлении пустого запроса");
-        assertTrue(responseReleaseDate.statusCode() == 500,
+        assertTrue(responseReleaseDate.statusCode() == 400,
                 "Ошибка валидации при указании неправильной даты выпуска");
-        assertTrue(responseDuration.statusCode() == 500,
+        assertTrue(responseDuration.statusCode() == 400,
                 "Ошибка валидации при указании отрицательной продолжительности фильма");
-        assertTrue(responseDescription.statusCode() == 500,
+        assertTrue(responseDescription.statusCode() == 400,
                 "Ошибка валидации при привышении органичения в description");
-        assertTrue(responseName.statusCode() == 500,
+        assertTrue(responseName.statusCode() == 400,
                 "Ошибка валидации при указании пустого имени");
     }
 
