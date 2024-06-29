@@ -7,12 +7,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-public interface FilmDbInterface {
+public interface DbFilmInterface {
     public Film create(NewFilmRequest film);
 
     public Film update(NewFilmRequest NewFilmRequest);
 
     public Collection<Film> findAll();
+    public Film findFilmById(Long filmId);
 
     public List<Film> findList(Optional<Integer> count);
 

@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dal.UserDbStorage;
 import ru.yandex.practicum.filmorate.dto.UserDto;
+import ru.yandex.practicum.filmorate.interfaces.DbUserInterface;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.FriendStatus;
 import ru.yandex.practicum.filmorate.model.User;
@@ -15,11 +16,11 @@ import java.time.LocalDate;
 import java.util.*;
 
 @Service
-public class NewUserService implements UserDbInterface {
+public class DbUserService implements DbUserInterface {
     private final UserDbStorage userDbStorage;
-    private static final Logger LOGGER = LoggerFactory.getLogger(NewUserService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DbUserService.class);
 
-    public NewUserService(UserDbStorage userDbStorage) {
+    public DbUserService(UserDbStorage userDbStorage) {
         this.userDbStorage = userDbStorage;
     }
 

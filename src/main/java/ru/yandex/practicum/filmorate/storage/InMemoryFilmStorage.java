@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage;
 
 import exception.NotFoundException;
 import exception.ValidationException;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+@Getter
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
     private static final Logger LOGGER = LoggerFactory.getLogger(InMemoryFilmStorage.class);
@@ -91,7 +93,4 @@ public class InMemoryFilmStorage implements FilmStorage {
         }
     }
 
-    public Map<Long, Film> getFilms() {
-        return films;
-    }
 }

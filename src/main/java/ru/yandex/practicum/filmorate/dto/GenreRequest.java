@@ -1,2 +1,8 @@
-package ru.yandex.practicum.filmorate.dto;public class GenreRequest {
+package ru.yandex.practicum.filmorate.dto;
+
+import lombok.Data;
+
+@Data
+public class GenreRequest {
+    private Long id;
 }

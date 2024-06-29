@@ -8,18 +8,19 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dal.FilmDbStorage;
 import ru.yandex.practicum.filmorate.dal.UserDbStorage;
 import ru.yandex.practicum.filmorate.dto.NewFilmRequest;
+import ru.yandex.practicum.filmorate.interfaces.DbFilmInterface;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
 import java.util.*;
 
 @Service
-public class NewFilmService implements FilmDbInterface {
+public class DbFilmService implements DbFilmInterface {
     private final FilmDbStorage filmDbStorage;
     private final UserDbStorage userDbStorage;
-    private static final Logger LOGGER = LoggerFactory.getLogger(NewFilmService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DbFilmService.class);
 
-    public NewFilmService(FilmDbStorage filmDbStorage, UserDbStorage userDbStorage) {
+    public DbFilmService(FilmDbStorage filmDbStorage, UserDbStorage userDbStorage) {
         this.filmDbStorage = filmDbStorage;
         this.userDbStorage = userDbStorage;
     }
@@ -71,12 +72,12 @@ public class NewFilmService implements FilmDbInterface {
     @Override
     public Film create(NewFilmRequest film) {
         if (film.getName().isEmpty()) {
-            LOGGER.error("Error имя  не может быть пустым");
-            throw new ValidationException("Error имя  не может быть пустым");
+            LOGGER.error("Error имя не может быть пустым");
+            throw new ValidationException("Error имя не может быть пустым");
         }
         if (film.getDescription().length() > 200) {
-            LOGGER.error("Error имя  не может быть пустым");
-            throw new ValidationException("Error имя  не может быть пустым");
+            LOGGER.error("Error описание не должно привышать 200 символов");
+            throw new ValidationException("Error описание не должно привышать 200 символов");
         }
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
             LOGGER.error("Дата не может быть раньше 28/12/1895");
@@ -99,7 +100,13 @@ public class NewFilmService implements FilmDbInterface {
         return filmDbStorage.findAll();
     }
 
-    private Long findLikeCountForFilm(Long filId) {
-        return filmDbStorage.findLikeCountForFilm(filId);
+    @Override
+    public Film findFilmById(Long filmId) {
+        Optional<Film> filmOpt = filmDbStorage.findById(filmId);
+        if (filmOpt.isEmpty()) {
+            LOGGER.error("Error фильма с id - " + filmId + " нет");
+            throw new NotFoundException("Error фильма с id - " + filmId + " нет");
+        }
+        return filmOpt.get();
     }
 }

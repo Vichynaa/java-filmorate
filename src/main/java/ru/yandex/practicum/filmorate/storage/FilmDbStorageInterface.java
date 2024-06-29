@@ -5,7 +5,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
 
-public interface FilmStorage {
+public interface FilmDbStorageInterface {
     public Collection<Film> findAll();
 
     public Film create(NewFilmRequest film);

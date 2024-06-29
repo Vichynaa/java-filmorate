@@ -1,2 +1,8 @@
-package ru.yandex.practicum.filmorate.dto;public class MpaRequest {
+package ru.yandex.practicum.filmorate.dto;
+
+import lombok.Data;
+
+@Data
+public class MpaRequest {
+    private Long id;
 }

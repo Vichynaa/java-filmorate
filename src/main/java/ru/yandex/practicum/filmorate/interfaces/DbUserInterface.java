@@ -6,7 +6,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.util.Collection;
 import java.util.List;
 
-public interface UserDbInterface {
+public interface DbUserInterface {
     public UserDto create(User user);
 
     public UserDto update(User newUser);
