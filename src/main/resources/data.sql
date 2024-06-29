@@ -1,24 +1,3 @@
-
-DELETE FROM friends;
-
-
-DELETE FROM likes;
-
-
-DELETE FROM users;
-
-DELETE FROM film_genres;
-
-
-DELETE FROM films;
-
-
-DELETE FROM genres;
-
-
-DELETE FROM mpa;
-
-
 INSERT INTO genres (id, genre_name)
 VALUES
     (1, 'Комедия'),
