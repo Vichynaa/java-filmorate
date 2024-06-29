@@ -16,6 +16,7 @@ import java.util.Collection;
 public class MpaController {
     private static final Logger LOGGER = LoggerFactory.getLogger(MpaController.class);
     private final DbMpaService mpaService;
+
     public MpaController(DbMpaService mpaService) {
         this.mpaService = mpaService;
     }
