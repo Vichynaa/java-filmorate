@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.dal;
 
 import exception.ValidationException;
+import lombok.Lombok;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -15,6 +16,7 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmDbStorageInterface;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 public class FilmDbStorage extends BaseRepository<Film> implements FilmDbStorageInterface {
@@ -56,6 +58,9 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmDbStorage
             "SELECT COUNT(user_like_id) AS like_count " +
                     "FROM likes " +
                     "WHERE film_like_id = ?";
+    private static final String FIND_ALL_GENRES_FOR_FILMS = "SELECT fg.film_id, fg.genre_id, g.genre_name " +
+            "FROM film_genres fg " +
+            "LEFT JOIN genres g ON fg.genre_id = g.id";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FilmDbStorage.class);
 
@@ -65,13 +70,17 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmDbStorage
 
     public Collection<Film> findAll() {
         Collection<Film> films = findMany(FIND_ALL_QUERY);
+        List<Map<String, Object>> result = jdbc.queryForList(FIND_ALL_GENRES_FOR_FILMS);
+        Map<Long, List<Genres>> filmsGenres = new HashMap<>();
+        for (Map<String, Object> rs : result) {
+            Long filmId = ((Number) rs.get("film_id")).longValue();;
+            Genres genre = new Genres();
+            genre.setId(((Number) rs.get("genre_id")).longValue());
+            genre.setName((String) rs.get("genre_name"));
+            filmsGenres.computeIfAbsent(filmId, k -> new ArrayList<>()).add(genre);
+        }
         for (Film film : films) {
-            List<Genres> genres = jdbc.query(FIND_GENRES_BY_ID_QUERY, (rs, rowNum) -> {
-                Genres genre = new Genres();
-                genre.setId(rs.getLong("genre_id"));
-                genre.setName(rs.getString("genre_name"));
-                return genre;
-            }, film.getId());
+            List<Genres> genres = filmsGenres.getOrDefault(film.getId(), new ArrayList<>());
             film.setGenres(genres);
         }
         return films;
@@ -97,21 +106,17 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmDbStorage
         film.setDescription(filmRequest.getDescription());
         film.setReleaseDate(filmRequest.getReleaseDate());
         film.setDuration(filmRequest.getDuration());
-
         if (filmRequest.getGenres() != null) {
-            Set<GenreRequest> genresSet = new HashSet<>(filmRequest.getGenres());
-            List<Genres> genresList = new ArrayList<>();
-            for (GenreRequest genre : genresSet) {
-                Optional<Genres> genreOpt = findGenresById(genre.getId());
-                if (genreOpt.isPresent()) {
-                    Genres genres = genreOpt.get();
-                    insert(INSERT_QUERY_INTO_FILM_GENRES, film.getId(), genres.getId());
-                    genresList.add(genres);
-
-                } else {
-                    LOGGER.error("Error нету жанра с id - " + genre.getId());
-                    throw new ValidationException("Error нету жанра с id - " + genre.getId());
-                }
+            Set<Long> genreIds = filmRequest.getGenres().stream()
+                    .map(GenreRequest::getId)
+                    .collect(Collectors.toSet());
+            List<Genres> genresList = findGenresByIds(genreIds);
+            if (genresList.size() != genreIds.size()) {
+                LOGGER.error("Error вы указали жанр или жанры, которых не существует");
+                throw new ValidationException("Error вы указали жанр или жанры, которых не существует");
+            }
+            for (Genres genre : genresList) {
+                insert(INSERT_QUERY_INTO_FILM_GENRES, film.getId(), genre.getId());
             }
             film.setGenres(genresList.stream().sorted(Comparator.comparingLong(Genres::getId)).toList());
         }
@@ -148,19 +153,16 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmDbStorage
         Film film = new Film();
         jdbc.update(DELETE_GENRES_QUERY, newFilmRequest.getId());
         if (newFilmRequest.getGenres() != null) {
-            Set<GenreRequest> genresSet = new HashSet<>(newFilmRequest.getGenres());
-            List<Genres> genresList = new ArrayList<>();
-            for (GenreRequest genre : genresSet) {
-                Optional<Genres> genreOpt = findGenresById(genre.getId());
-                if (genreOpt.isPresent()) {
-                    Genres genres = genreOpt.get();
-                    insert(INSERT_QUERY_INTO_FILM_GENRES, film.getId(), genres.getId());
-                    genresList.add(genres);
-
-                } else {
-                    LOGGER.error("Error нету жанра с id -" + genre.getId());
-                    throw new ValidationException("Error нету жанра с id - " + genre.getId());
-                }
+            Set<Long> genreIds = newFilmRequest.getGenres().stream()
+                    .map(GenreRequest::getId)
+                    .collect(Collectors.toSet());
+            List<Genres> genresList = findGenresByIds(genreIds);
+            if (genresList.size() != genreIds.size()) {
+                LOGGER.error("Error вы указали жанр или жанры, которых не существует");
+                throw new ValidationException("Error вы указали жанр или жанры, которых не существует");
+            }
+            for (Genres genre : genresList) {
+                insert(INSERT_QUERY_INTO_FILM_GENRES, film.getId(), genre.getId());
             }
             film.setGenres(genresList.stream().sorted(Comparator.comparingLong(Genres::getId)).toList());
         }
@@ -234,5 +236,16 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmDbStorage
 
     public Long findLikeCountForFilm(Long filmId) {
         return jdbc.queryForObject(LIKES_COUNT_QUERY, (rs, rowNum) -> rs.getLong("like_count"), filmId);
+    }
+
+    private List<Genres> findGenresByIds(Set<Long> genreIds) {
+        String genres = genreIds.toString().replace("[", "(").replace("]", ")");
+        String query = String.format("SELECT id, genre_name FROM genres WHERE id IN %s", genres);
+        return jdbc.query(query, (rs, rowNum) -> {
+            Genres genre = new Genres();
+            genre.setId(rs.getLong("id"));
+            genre.setName(rs.getString("genre_name"));
+            return genre;
+        });
     }
 }
