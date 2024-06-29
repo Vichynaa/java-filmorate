@@ -32,9 +32,9 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
             List<Map<String, Object>> results = jdbc.queryForList(FIND_FRIENDS_BY_USER_ID, userId);
             Map<Long, FriendStatus> friends = new HashMap<>();
             for (Map<String, Object> row : results) {
-                Long to_user_id = ((Number) row.get("to_user_id")).longValue();
+                Long toUserId = ((Number) row.get("to_user_id")).longValue();
                 FriendStatus status = FriendStatus.valueOf(row.get("status").toString());
-                friends.put(to_user_id, status);
+                friends.put(toUserId, status);
             }
             user.setFromUserRequest(friends);
             userOpt = Optional.of(user);
@@ -69,8 +69,8 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
                 newUser.getBirthday(),
                 newUser.getId()
         );
-        String DELETE_FRIENDS_QUERY = "DELETE FROM friends WHERE from_user_id = ?";
-        jdbc.update(DELETE_FRIENDS_QUERY, newUser.getId());
+        String deleteFriendsQuery = "DELETE FROM friends WHERE from_user_id = ?";
+        jdbc.update(deleteFriendsQuery, newUser.getId());
 
         for (Map.Entry<Long, FriendStatus> entry : newUser.getFromUserRequest().entrySet()) {
             Long toUserId = entry.getKey();
