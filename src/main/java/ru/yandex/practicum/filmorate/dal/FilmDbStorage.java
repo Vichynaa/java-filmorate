@@ -146,9 +146,7 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmDbStorage
                 newFilmRequest.getId()
         );
         Film film = new Film();
-        LOGGER.info(newFilmRequest.toString());
         jdbc.update(DELETE_GENRES_QUERY, newFilmRequest.getId());
-        LOGGER.info(newFilmRequest.toString());
         if (newFilmRequest.getGenres() != null) {
             Set<GenreRequest> genresSet = new HashSet<>(newFilmRequest.getGenres());
             List<Genres> genresList = new ArrayList<>();
