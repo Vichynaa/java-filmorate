@@ -6,5 +6,6 @@ import java.util.Collection;
 
 public interface DbGenresInterface {
     public Collection<Genres> findAll();
+
     public Genres findNameById(Long genresId);
 }

@@ -13,6 +13,7 @@ public interface DbFilmInterface {
     public Film update(NewFilmRequest newFilmRequest);
 
     public Collection<Film> findAll();
+
     public Film findFilmById(Long filmId);
 
     public List<Film> findList(Optional<Integer> count);

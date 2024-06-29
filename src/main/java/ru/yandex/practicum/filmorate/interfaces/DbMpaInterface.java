@@ -6,5 +6,6 @@ import java.util.Collection;
 
 public interface DbMpaInterface {
     public Collection<Mpa> findAll();
+
     public Mpa findMpaById(Long mpaId);
 }
