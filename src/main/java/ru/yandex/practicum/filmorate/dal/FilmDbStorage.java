@@ -160,7 +160,7 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmDbStorage
                     genresList.add(genres);
 
                 } else {
-                    LOGGER.error("Error нету жанра с id - " + genre.getId());
+                    LOGGER.error("Error нету жанра с id -" + genre.getId());
                     throw new ValidationException("Error нету жанра с id - " + genre.getId());
                 }
             }
