@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.dal;
 
 import exception.ValidationException;
-import lombok.Lombok;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
