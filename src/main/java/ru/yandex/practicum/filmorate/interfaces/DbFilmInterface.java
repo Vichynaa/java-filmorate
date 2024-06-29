@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface DbFilmInterface {
     public Film create(NewFilmRequest film);
 
-    public Film update(NewFilmRequest NewFilmRequest);
+    public Film update(NewFilmRequest newFilmRequest);
 
     public Collection<Film> findAll();
     public Film findFilmById(Long filmId);
