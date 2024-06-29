@@ -168,21 +168,18 @@ public class DbUserService implements DbUserInterface {
         if (!firstUserFriends.containsKey(secondId)) {
             if (!secondUserFriends.containsKey(firstId)) {
                 firstUserFriends.put(secondId, FriendStatus.UNCONFIRMED);
-            }
-            else {
+            } else {
                 firstUserFriends.put(secondId, FriendStatus.CONFIRMED);
                 secondUserFriends.put(firstId, FriendStatus.CONFIRMED);
                 LOGGER.info(String.format("Info пользователи с id - %d и %d, стали друзьями", firstId, secondId));
             }
-        }
-        else {
+        } else {
             if (firstUserFriends.get(secondId) == FriendStatus.CONFIRMED) {
                 LOGGER.debug(String.format("Debug пользователи с id - %d и %d, уже друзья",
                         firstId, secondId));
                 throw new ValidationException(String.format("Пользователи с id - %d и %d, уже друзья",
                         firstId, secondId));
-            }
-            else {
+            } else {
                 LOGGER.debug(String.format("Debug пользователь с id - %d, уже отправил запрос пользователю с id - %d",
                         firstId, secondId));
                 throw new ValidationException(String.format("Debug пользователь с id - %d," +
