@@ -11,5 +11,3 @@ public interface UserStorage {
 
     public User update(User newUser);
 }
-
-

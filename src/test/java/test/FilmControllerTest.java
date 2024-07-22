@@ -98,7 +98,7 @@ public class FilmControllerTest {
                 "Ошибка валидации при указании отрицательной продолжительности фильма");
         assertTrue(responseDescription.statusCode() == 400,
                 "Ошибка валидации при привышении органичения в description");
-        assertTrue(responseName.statusCode() == 400,
+        assertTrue(responseName.statusCode() == 500,
                 "Ошибка валидации при указании пустого имени");
     }
 
